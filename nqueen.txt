@@ -1,0 +1,76 @@
+import numpy as np
+
+def printboard(board, N, col):
+    # Function to print the current state of the board.
+    # It prints the board row by row, showing queen positions ('Q') and empty spaces ('.').
+    for row in range(N):
+        print(" ".join(board[row]))
+    print("\n")
+
+def issafe(board, N, col, row):
+    # Function to check if placing a queen at (row, col) is safe.
+    # This checks three conditions to ensure no other queen can attack the current position.
+
+    # Check the same row on the left side.
+    i = row
+    j = col
+    while j >= 0:
+        if (board[i][j] == 'Q'):
+            return False
+        j = j - 1
+
+    # Check the upper diagonal on the left side.
+    i = row
+    j = col
+    while i >= 0 and j >= 0:
+        if (board[i][j] == 'Q'):
+            return False
+        i = i - 1
+        j = j - 1
+
+    # Check the lower diagonal on the left side.
+    i = row
+    j = col
+    while i < N and j >= 0:
+        if (board[i][j] == 'Q'):
+            return False
+        i = i + 1
+        j = j - 1
+
+    # If no threats, return True indicating it is safe to place a queen here.
+    return True
+
+def solvequeen(board, N, col):
+    # Recursive function to solve the N-Queens problem.
+    # It places queens one by one in different columns.
+
+    # Base case: if all queens are placed (col >= N), print the solution.
+    if col >= N:
+        printboard(board, N, col)
+        return
+
+    # Try placing a queen in each row for the current column.
+    for row in range(N):
+        # Check if placing a queen at (row, col) is safe.
+        if issafe(board, N, col, row):
+            # Place the queen on the board.
+            board[row][col] = 'Q'
+
+            # Recur to place the next queen in the next column.
+            solvequeen(board, N, col + 1)
+
+            # Backtrack: remove the queen and try the next row.
+            board[row][col] = '.'
+
+# Input for board size (N)
+N = int(input("Enter the value of N: "))
+
+# Check if a solution is possible for the given N (no solution exists for N < 4).
+if N < 4:
+    print("No solution exists.")
+else:
+    # Initialize the board with '.' (empty spaces) using numpy.
+    board = np.full((N, N), '.')
+    
+    # Start solving from the first column.
+    solvequeen(board, N, 0)
