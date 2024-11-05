@@ -1,0 +1,71 @@
+import heapq  # Import the heapq module for priority queue implementation
+
+def a_star_algorithm(start_node, goal_node):
+    open_set = []  # Initialize the open set (priority queue) for nodes to be evaluated
+    heapq.heappush(open_set, (0, start_node))  # Push the starting node with cost 0
+    came_from = {}  # Dictionary to store the best path to each node
+    g_score = {node: float('inf') for node in graph}  # Initialize g_score for all nodes to infinity
+    g_score[start_node] = 0  # Cost from start to start is 0
+    f_score = {node: float('inf') for node in graph}  # Initialize f_score for all nodes to infinity
+    f_score[start_node] = heuristic[start_node]  # Set the f_score for the start node
+
+    while open_set:  # While there are nodes to evaluate
+        current = heapq.heappop(open_set)[1]  # Get the node with the lowest f_score
+
+        if current == goal_node:  # If we reached the goal node
+            return reconstruct_path(came_from, current)  # Reconstruct and return the path
+
+        # Explore neighbors of the current node
+        for neighbor, weight in graph[current]:
+            tentative_g_score = g_score[current] + weight  # Calculate tentative g_score
+
+            if tentative_g_score < g_score[neighbor]:  # If this path to neighbor is better
+                came_from[neighbor] = current  # Record the best path to neighbor
+                g_score[neighbor] = tentative_g_score  # Update g_score for neighbor
+                f_score[neighbor] = tentative_g_score + heuristic[neighbor]  # Update f_score
+                # If neighbor is not already in open set, add it
+                if neighbor not in [i[1] for i in open_set]:
+                    heapq.heappush(open_set, (f_score[neighbor], neighbor))  # Push neighbor onto open set
+
+    return "Path does not exist!"  # If no path is found
+
+def reconstruct_path(came_from, current):
+    total_path = [current]  # Start with the current node in the path
+    while current in came_from:  # While there are nodes to trace back
+        current = came_from[current]  # Move to the parent node
+        total_path.append(current)  # Add parent to the path
+    return total_path[::-1]  # Reverse the path to start from the beginning
+
+# Example graph as an adjacency list with costs
+graph = {
+    'A': [('B', 6), ('F', 3)],  # Neighbors of A with respective weights
+    'B': [('A', 6), ('C', 3), ('D', 2)],  # Neighbors of B
+    'C': [('B', 3), ('D', 1), ('E', 5)],  # Neighbors of C
+    'D': [('B', 2), ('C', 1), ('E', 8)],  # Neighbors of D
+    'E': [('C', 5), ('D', 8), ('I', 5), ('J', 5)],  # Neighbors of E
+    'F': [('A', 3), ('G', 1), ('H', 7)],  # Neighbors of F
+    'G': [('F', 1), ('I', 3)],  # Neighbors of G
+    'H': [('F', 7), ('I', 2)],  # Neighbors of H
+    'I': [('E', 5), ('G', 3), ('H', 2), ('J', 3)],  # Neighbors of I
+    'J': []  # Ensure goal node is defined
+}
+
+# Heuristic values for each node
+heuristic = {
+    'A': 11,  # Heuristic cost from A to goal
+    'B': 6,   # Heuristic cost from B to goal
+    'C': 5,   # Heuristic cost from C to goal
+    'D': 7,   # Heuristic cost from D to goal
+    'E': 3,   # Heuristic cost from E to goal
+    'F': 6,   # Heuristic cost from F to goal
+    'G': 5,   # Heuristic cost from G to goal
+    'H': 3,   # Heuristic cost from H to goal
+    'I': 1,   # Heuristic cost from I to goal
+    'J': 0    # Heuristic cost from J to goal (goal itself)
+}
+
+# Driver Code
+start_node = 'A'  # Define the starting node
+goal_node = 'J'   # Define the goal node
+path = a_star_algorithm(start_node, goal_node)  # Call the A* algorithm
+print("Path found:", path)  # Print the found path

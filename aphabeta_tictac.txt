@@ -1,0 +1,65 @@
+def print_board(board):
+    # Print each row of the board
+    for row in board:
+        print(" | ".join(row))  # Join each cell in the row with a pipe separator for visibility
+        print("-" * 9)  # Print a line of dashes to separate the rows
+
+def check_winner(board):
+    # Check for a winner in rows
+    for row in board:
+        if row[0] == row[1] == row[2] != ' ':  # Check if all cells in the row are the same and not empty
+            return row[0]  # Return the winning symbol ('X' or 'O')
+
+    # Check for a winner in columns
+    for col in range(3):
+        if board[0][col] == board[1][col] == board[2][col] != ' ':  # Check if all cells in the column are the same
+            return board[0][col]  # Return the winning symbol
+
+    # Check for a winner in the main diagonal
+    if board[0][0] == board[1][1] == board[2][2] != ' ':  # Check the diagonal from top-left to bottom-right
+        return board[0][0]  # Return the winning symbol
+
+    # Check for a winner in the anti-diagonal
+    if board[0][2] == board[1][1] == board[2][0] != ' ':  # Check the diagonal from top-right to bottom-left
+        return board[0][2]  # Return the winning symbol
+
+    return None  # Return None if there is no winner yet
+
+def is_draw(board):
+    # Check if the board is full with no empty spaces
+    return all(cell != ' ' for row in board for cell in row)  # Returns True if all cells are filled
+
+def play_game():
+    # Initialize the game board with empty spaces
+    board = [[' ' for _ in range(3)] for _ in range(3)]
+    current_player = 'X'  # Start with player X
+
+    while True:
+        print_board(board)  # Display the current board
+        print(f"Player {current_player}, enter your move (row and column): ")
+        
+        # Get the player's move
+        row = int(input("Row (0-2): "))
+        col = int(input("Column (0-2): "))
+
+        # Check if the selected cell is empty
+        if board[row][col] == ' ':
+            board[row][col] = current_player  # Place the player's symbol on the board
+            winner = check_winner(board)  # Check if the current move results in a win
+            if winner:
+                print_board(board)  # Show the final board
+                print(f"Player {winner} wins!")  # Announce the winner
+                break  # End the game
+            
+            if is_draw(board):  # Check for a draw condition
+                print_board(board)  # Show the final board
+                print("It's a draw!")  # Announce the draw
+                break  # End the game
+            
+            # Switch players
+            current_player = 'O' if current_player == 'X' else 'X'
+        else:
+            print("Invalid move! Try again.")  # Prompt for a valid move if the cell is occupied
+
+# Run the game
+play_game()

@@ -1,0 +1,45 @@
+# Define the graph using a dictionary
+graph = {
+    '5': ['3', '7'],
+    '3': ['2', '4'],
+    '7': ['8'],
+    '2': [],
+    '4': ['8'],
+    '8': []
+}
+
+# BFS implementation
+def bfs(graph, start):
+    visited = []  # List for visited nodes
+    queue = []    # Initialize a queue
+
+    visited.append(start)
+    queue.append(start)
+
+    print("Following is the Breadth-First Search:")
+    while queue:  # Creating loop to visit each node
+        m = queue.pop(0)
+        print(m, end=" ")
+
+        for neighbour in graph[m]:
+            if neighbour not in visited:
+                visited.append(neighbour)
+                queue.append(neighbour)
+    print()  # New line after BFS output
+
+# DFS implementation
+def dfs(graph, start, visited=None):
+    if visited is None:
+        visited = set()  # Set to keep track of visited nodes
+
+    if start not in visited:
+        print(start, end=" ")  # Print each node on the same line
+        visited.add(start)
+        for neighbour in graph[start]:
+            dfs(graph, neighbour, visited)
+
+# Driver Code
+bfs(graph, '5')    # Call BFS starting from node '5'
+print("Following is the Depth-First Search:")
+dfs(graph, '5')    # Call DFS starting from node '5'
+print()  # New line after DFS output
