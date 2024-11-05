@@ -1,18 +1,19 @@
 def print_board(board):
-    # Print each row of the board
+    """Prints the current state of the board."""
     for row in board:
-        print(" | ".join(row))  # Join each cell in the row with a pipe separator for visibility
+        print(" | ".join(row))  # Join each cell in the row with a pipe separator
         print("-" * 9)  # Print a line of dashes to separate the rows
 
 def check_winner(board):
+    """Checks if there is a winner on the board."""
     # Check for a winner in rows
     for row in board:
-        if row[0] == row[1] == row[2] != ' ':  # Check if all cells in the row are the same and not empty
+        if row[0] == row[1] == row[2] != ' ':  # All cells in the row are the same and not empty
             return row[0]  # Return the winning symbol ('X' or 'O')
 
     # Check for a winner in columns
     for col in range(3):
-        if board[0][col] == board[1][col] == board[2][col] != ' ':  # Check if all cells in the column are the same
+        if board[0][col] == board[1][col] == board[2][col] != ' ':  # All cells in the column are the same
             return board[0][col]  # Return the winning symbol
 
     # Check for a winner in the main diagonal
@@ -26,40 +27,155 @@ def check_winner(board):
     return None  # Return None if there is no winner yet
 
 def is_draw(board):
-    # Check if the board is full with no empty spaces
+    """Checks if the game is a draw (board is full with no empty spaces)."""
     return all(cell != ' ' for row in board for cell in row)  # Returns True if all cells are filled
 
+def minimax(board, depth, is_maximizing, alpha, beta):
+    """
+    Minimax algorithm with Alpha-Beta Pruning.
+    
+    Args:
+        board: Current state of the game board.
+        depth: Current depth in the game tree.
+        is_maximizing: Boolean indicating if the current move is maximizing or minimizing.
+        alpha: Best score that the maximizing player can guarantee.
+        beta: Best score that the minimizing player can guarantee.
+    
+    Returns:
+        The score of the board.
+    """
+    winner = check_winner(board)
+    if winner == 'X':
+        return -1  # X (human) is maximizing, so we want to minimize score for AI
+    elif winner == 'O':
+        return 1  # O (AI) is minimizing, so we want to maximize score for AI
+    elif is_draw(board):
+        return 0  # Draw
+
+    if is_maximizing:  # Maximizing player's turn (AI)
+        max_eval = float('-inf')
+        for row in range(3):
+            for col in range(3):
+                if board[row][col] == ' ':  # Check for empty cell
+                    board[row][col] = 'O'  # AI makes a move
+                    eval = minimax(board, depth + 1, False, alpha, beta)  # Recursively call minimax
+                    board[row][col] = ' '  # Undo move
+                    max_eval = max(max_eval, eval)  # Update max_eval
+                    alpha = max(alpha, eval)  # Update alpha
+                    if beta <= alpha:  # Beta cut-off
+                        break  # Stop exploring further
+        return max_eval
+    else:  # Minimizing player's turn (human)
+        min_eval = float('inf')
+        for row in range(3):
+            for col in range(3):
+                if board[row][col] == ' ':  # Check for empty cell
+                    board[row][col] = 'X'  # Human makes a move
+                    eval = minimax(board, depth + 1, True, alpha, beta)  # Recursively call minimax
+                    board[row][col] = ' '  # Undo move
+                    min_eval = min(min_eval, eval)  # Update min_eval
+                    beta = min(beta, eval)  # Update beta
+                    if beta <= alpha:  # Alpha cut-off
+                        break  # Stop exploring further
+        return min_eval
+        
+# The minimax function evaluates the game state recursively.
+
+# It first checks if the game has ended with a win or draw and assigns scores accordingly.
+
+# If it's the AI's turn (is_maximizing is True), it tries to maximize its score.
+
+# It iterates over all cells, placing its mark (O) in empty cells.
+# After placing, it calls minimax recursively to evaluate the board state from this new perspective.
+# After evaluating, it undoes the move and updates the maximum score found.
+# It uses Alpha-Beta values to prune branches that won’t affect the outcome.
+# If it’s the human’s turn, it works similarly but tries to minimize the score.
+
+def best_move(board):
+    """Determines the best move for the AI using the Minimax algorithm."""
+    best_eval = float('-inf')  # Initialize best evaluation to negative infinity
+    move = (-1, -1)  # Initialize the best move
+
+    # Evaluate all possible moves
+    for row in range(3):
+        for col in range(3):
+            if board[row][col] == ' ':  # Check for empty cell
+                board[row][col] = 'O'  # AI makes a move
+                eval = minimax(board, 0, False, float('-inf'), float('inf'))  # Evaluate move
+                board[row][col] = ' '  # Undo move
+                if eval > best_eval:  # If the evaluation is better than best_eval
+                    best_eval = eval  # Update best_eval
+                    move = (row, col)  # Update the best move
+
+    return move  # Return the best move found
+
 def play_game():
-    # Initialize the game board with empty spaces
-    board = [[' ' for _ in range(3)] for _ in range(3)]
+    """Main function to play the Tic-Tac-Toe game."""
+    board = [[' ' for _ in range(3)] for _ in range(3)]  # Initialize the game board
     current_player = 'X'  # Start with player X
 
     while True:
         print_board(board)  # Display the current board
-        print(f"Player {current_player}, enter your move (row and column): ")
-        
-        # Get the player's move
-        row = int(input("Row (0-2): "))
-        col = int(input("Column (0-2): "))
+        if current_player == 'X':  # Human player's turn
+            print(f"Player {current_player}, enter your move (row and column): ")
+            row = int(input("Row (0-2): "))  # Get row input
+            col = int(input("Column (0-2): "))  # Get column input
+            if board[row][col] == ' ':  # Check if the selected cell is empty
+                board[row][col] = current_player  # Place the player's symbol on the board
+            else:
+                print("Invalid move! Try again.")  # Prompt for a valid move if the cell is occupied
+                continue
+        else:  # AI player's turn
+            print("AI is making a move...")
+            row, col = best_move(board)  # Get the best move from the AI
+            board[row][col] = current_player  # Place the AI's symbol on the board
 
-        # Check if the selected cell is empty
-        if board[row][col] == ' ':
-            board[row][col] = current_player  # Place the player's symbol on the board
-            winner = check_winner(board)  # Check if the current move results in a win
-            if winner:
-                print_board(board)  # Show the final board
-                print(f"Player {winner} wins!")  # Announce the winner
-                break  # End the game
-            
-            if is_draw(board):  # Check for a draw condition
-                print_board(board)  # Show the final board
-                print("It's a draw!")  # Announce the draw
-                break  # End the game
-            
-            # Switch players
-            current_player = 'O' if current_player == 'X' else 'X'
-        else:
-            print("Invalid move! Try again.")  # Prompt for a valid move if the cell is occupied
+        winner = check_winner(board)  # Check for a winner after the move
+        if winner:
+            print_board(board)  # Show the final board
+            print(f"Player {winner} wins!")  # Announce the winner
+            break  # End the game
+        if is_draw(board):  # Check for a draw condition
+            print_board(board)  # Show the final board
+            print("It's a draw!")  # Announce the draw
+            break  # End the game
 
-# Run the game
-play_game()
+        current_player = 'O' if current_player == 'X' else 'X'  # Switch players
+
+play_game()  # Start the game
+
+
+# Alpha-Beta Pruning is an optimization for the Minimax algorithm that makes it faster by cutting off branches in the decision tree that won’t influence the final decision:
+
+# Alpha and Beta Values:
+
+# Alpha: The best score that the maximizing player (AI) can guarantee so far.
+# Beta: The best score that the minimizing player (human) can guarantee so far.
+# Pruning Logic:
+
+# As the algorithm explores moves, it keeps track of Alpha and Beta.
+# If it finds a move that makes the current score worse than the best guaranteed score for either player (worse than Alpha for the maximizing player or worse than Beta for the minimizing player), it stops exploring that branch. This is called pruning.
+# Example Walkthrough
+# Imagine the game is in a state where the board looks like this:
+
+
+
+# X | O | X
+# ---------
+# O | X |  
+# ---------
+#   | O |  
+# Human Player's Turn:
+
+# Player X can choose any empty cell to place their mark.
+# AI Player's Turn Using Minimax:
+
+# The AI considers each possible move it can make.
+# It simulates all possible responses from Player X, continuing to create a tree of possible future game states.
+# For each end state, it assigns a score (+1, -1, or 0).
+# Choosing the Best Move:
+
+# After evaluating all possible outcomes, the AI selects the move that will lead to the highest score (or minimize the worst outcome against the human player).
+# Using Alpha-Beta Pruning:
+
+# While evaluating moves, if the AI finds that a certain move will definitely lead to a worse score than a previous move it has already considered, it ignores that move entirely (pruning).
