@@ -34,3 +34,88 @@ while (no_edge < N - 1):
     print(str(a) + "-" + str(b) + ":" + str(G[a][b]))
     selected_node[b] = True
     no_edge += 1
+
+...............................................................................................................
+# Define the number of vertices in the graph
+V = 5
+
+# Function to find the vertex with the minimum key value that is not yet included in the MST
+def min_key(keys, mst_set):
+    # Initialize minimum value to a very high number
+    min_value = float('inf')  # Use infinity to represent an initially large value
+    min_index = -1  # This will store the index of the vertex with the minimum key
+
+    # Iterate through all vertices to find the one with the smallest key not yet in the MST
+    for v in range(V):
+        # Check if the current vertex key is smaller than the minimum found so far
+        # and that it's not yet included in the MST
+        if keys[v] < min_value and not mst_set[v]:
+            min_value = keys[v]  # Update minimum value
+            min_index = v  # Update minimum index with the current vertex
+
+    return min_index  # Return the index of the vertex with the minimum key
+
+# Function to print the constructed MST stored in the parent[] array
+def print_mst(parent, graph):
+    print("Edge \tWeight")  # Header for the output
+    for i in range(1, V):  # Start from 1 since parent[0] is the root and has no parent
+        # Print the edge from parent[i] to i and its weight from the graph matrix
+        print(f"{parent[i]} - {i} \t{graph[i][parent[i]]}")
+
+# Function to construct and print the MST using Prim's algorithm
+def prim_mst(graph):
+    # Array to store the constructed MST
+    parent = [-1] * V  # Initialize parent array to store the parent of each vertex
+    # Key values used to pick the minimum weight edge
+    keys = [float('inf')] * V  # Initialize keys to infinity
+    # To keep track of vertices included in the MST
+    mst_set = [False] * V  # Boolean array to track included vertices
+
+    # Start from the first vertex
+    keys[0] = 0  # Set the key of the first vertex to 0 to include it in the MST first
+
+    # The MST will have V - 1 edges
+    for _ in range(V - 1):
+        # Pick the minimum key vertex not yet included in the MST
+        u = min_key(keys, mst_set)  # Get the index of the vertex with the minimum key
+        mst_set[u] = True  # Mark the picked vertex as included in the MST
+
+        # Update key and parent for adjacent vertices of the picked vertex
+        for v in range(V):
+            # If there is an edge from u to v and v is not included in MST
+            # and the weight of the edge is less than the current key of v
+            if graph[u][v] and not mst_set[v] and graph[u][v] < keys[v]:
+                keys[v] = graph[u][v]  # Update the key of v to the weight of the edge
+                parent[v] = u  # Update parent of v to u
+
+    print_mst(parent, graph)  # Print the constructed MST
+
+# Example graph represented as an adjacency matrix
+graph = [
+    [0, 2, 0, 6, 0],  # Edges from vertex 0 to 1 (2), 3 (6)
+    [2, 0, 3, 8, 5],  # Edges from vertex 1 to 0 (2), 2 (3), 3 (8), 4 (5)
+    [0, 3, 0, 0, 7],  # Edges from vertex 2 to 1 (3), 4 (7)
+    [6, 8, 0, 0, 9],  # Edges from vertex 3 to 0 (6), 1 (8), 4 (9)
+    [0, 5, 7, 9, 0]   # Edges from vertex 4 to 1 (5), 2 (7), 3 (9)
+]
+
+# Run Prim's algorithm
+prim_mst(graph)  # Call the function to execute Prim's algorithm on the given graph
+Explanation of the Code
+Graph Representation: The graph is represented as an adjacency matrix, where graph[i][j] contains the weight of the edge between vertices i and j. A value of 0 indicates no edge.
+
+min_key Function:
+
+This function iterates through all vertices to find the one with the smallest key value that hasn't been included in the MST yet.
+It initializes a minimum value as infinity and returns the index of the vertex with the smallest key.
+print_mst Function:
+
+This function prints the edges of the MST by iterating through the parent array, which stores the parent of each vertex in the MST.
+prim_mst Function:
+
+This is the main function where Prim's algorithm is implemented.
+It initializes arrays for parent, keys, and mst_set.
+The algorithm repeatedly picks the minimum key vertex and updates the keys for adjacent vertices based on the weights of the edges until the MST is fully constructed.
+Example Graph: The example graph is a 5-vertex graph with edges and their weights defined in the adjacency matrix format.
+
+Execution: Finally, the prim_mst function is called with the example graph to execute the algorithm and print the resulting Minimum Spanning Tree
